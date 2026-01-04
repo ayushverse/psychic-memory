@@ -5,7 +5,8 @@ import express from "express";
 import connectDB from "./db.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import {UserModel} from "./db.js";
+import {UserModel,ContentModel} from "./db.js";
+import {userMiddleware} from "./middleware.js";
 
 const app = express();
 app.use(express.json());
@@ -45,16 +46,37 @@ app.post("/api/v1/login", async (req, res) => {
     }
 });
 
-app.post("/api/v1/content", (req, res) => {
-    res.json({ message: "Create content" });
+app.post("/api/v1/content", userMiddleware, async (req, res) => {
+    const{title, link, type} = req.body;
+    await ContentModel.create({
+        title,
+        link,
+        type,
+        //@ts-ignore
+        userId: req.userId,
+        tags : []
+    })
+    res.json({message:"Successfully created"});
 });
 
-app.get("/api/v1/content", (req, res) => {
-    res.json({ message: "Get content" });
+app.get("/api/v1/content",userMiddleware , async (req, res) => {
+    //@ts-ignore
+    const userId = req.userId
+    const content = await ContentModel.find({
+        userId: userId
+    }).lean();
+    res.json({content});
 });
 
-app.delete("/api/v1/content", (req, res) => {
-    res.json({ message: "Delete content" });
+app.delete("/api/v1/content", userMiddleware , async (req, res) => {
+    //@ts-ignore
+    const userId = req.userId
+    const contentId = req.body.id;
+    await ContentModel.deleteMany({
+        contentId,
+        userId: userId
+    });
+    res.json({message: "All content deleted"});
 });
 
 app.post("/api/v1/brain/share", (req, res) => {

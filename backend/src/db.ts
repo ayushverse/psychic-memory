@@ -1,6 +1,9 @@
 import mongoose from "mongoose";
 import {model,Schema} from "mongoose";
 
+//Models
+
+//User Schema
 const UserSchema = new Schema({
     username:{type: String, required: true, unique: true},
     password: {type: String, required: true}
@@ -8,8 +11,16 @@ const UserSchema = new Schema({
 
 export const UserModel = model("User", UserSchema);
 
+//Content Schema
+const ContentSchema = new Schema({
+    title: {type: String, required: true},
+    type: {type: String},
+    link: {type: String, required: true},
+    tags: [{type: mongoose.Types.ObjectId, ref: "Tag"}],
+    userId: {type: mongoose.Types.ObjectId, ref: "User", required: true}
+})
 
-
+export const ContentModel = model("Content", ContentSchema);
 
 //DB Connection
 const connectDB = async () : Promise<void> => {
