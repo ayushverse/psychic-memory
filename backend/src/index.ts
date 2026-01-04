@@ -3,12 +3,46 @@ dotenv.config();
 
 import express from "express";
 import connectDB from "./db.js";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import {UserModel} from "./db.js";
 
 const app = express();
 app.use(express.json());
 
-app.post("/api/v1/signin", (req, res) => {
-    res.json({ message: "Signin route" });
+app.post("/api/v1/signup", async (req, res) => {
+    const{username,password} = req.body;
+    const user = await UserModel.findOne({username});
+    if(user){
+        return  res.status(400).json({message: "Username already exists"});
+    }
+    const newUser = new UserModel({
+        username,
+        password
+    })
+    newUser.password = await bcrypt.hash(password,10);
+    await newUser.save();
+    res.status(201).json({message: "User created successfully"});
+});
+
+app.post("/api/v1/login", async (req, res) => {
+    const{username,password} = req.body;
+    const user = await UserModel.findOne({username});
+    if(!user){
+        return res.status(400).json({message: "Invalid username or password"});
+    }else{
+        const isMatch = await bcrypt.compare(password,user.password);
+        if(!isMatch){
+            return res.status(400).json({message: "Invalid username or password"});
+        }else{
+            const token = jwt.sign(
+                {userId: user._id, username: user.username},
+                process.env.JWT_SECRET || "defaultsecret",
+                {expiresIn: "24h"}
+            );
+            return res.status(200).json({token , message : "Logged In"});
+        }
+    }
 });
 
 app.post("/api/v1/content", (req, res) => {
