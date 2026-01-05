@@ -80,12 +80,11 @@ app.delete("/api/v1/content", userMiddleware , async (req, res) => {
 });
 
 app.post("/api/v1/brain/share", (req, res) => {
-    res.json({ message: "Share brain" });
+
 });
 
 app.get("/api/v1/brain/:sharedLink", (req, res) => {
-    const { sharedLink } = req.params;
-    res.json({ message: `Shared link: ${sharedLink}` });
+
 });
 
 const PORT = process.env.PORT || 5761;
