@@ -1,7 +1,9 @@
+import Button from "./components/Button.tsx";
+
 function App() {
     return (
         <div>
-            Hello, World!
+            <Button variant={"primary"} size={"sm"} text={"Add Content"} onClick={()=>console.log("clicked")} startIcon={"+"} endIcon={"-"} />
         </div>
     );
 }
