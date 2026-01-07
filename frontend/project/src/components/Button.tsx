@@ -18,7 +18,7 @@ const sizeStyles = {
 
 const variantStyles = {
     primary: "bg-blue-500 text-white hover:bg-blue-600",
-    secondary: "bg-gray-200 text-gray-800 hover:bg-gray-300"
+    secondary: "bg-blue-200 text-gray-800 hover:bg-gray-300"
 };
 
 const Button = ({ variant, size, text, startIcon, endIcon, onClick }: buttonProps) => {
