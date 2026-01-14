@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import {model,Schema} from "mongoose";
+import * as string_decoder from "node:string_decoder";
 
 //Models
 
@@ -21,6 +22,14 @@ const ContentSchema = new Schema({
 })
 
 export const ContentModel = model("Content", ContentSchema);
+
+
+const LinkSchema = new Schema({
+    hash:String,
+    userId: {type: mongoose.Types.ObjectId, ref: "User", required: true},
+})
+
+export const LinkModel = model("Links", LinkSchema);
 
 //DB Connection
 const connectDB = async () : Promise<void> => {
