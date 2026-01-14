@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import express from "express";
-import connectDB from "./db.js";
+import connectDB, {LinkModel} from "./db.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import {UserModel,ContentModel} from "./db.js";
@@ -73,24 +73,50 @@ app.delete("/api/v1/content", userMiddleware , async (req, res) => {
     const userId = req.userId
     const contentId = req.body.id;
     await ContentModel.deleteMany({
-        contentId,
-        userId: userId
+        _id:contentId,
+        userId
     });
     res.json({message: "All content deleted"});
 });
 
-app.post("/api/v1/brain/share",userMiddleware , (req, res) => {
-    const share = req.body.share;
-    if(share){
-        LinkModel.create({
-            userId: req.userId,
+app.post("/api/v1/brain/share",userMiddleware , async(req, res) => {
+    //@ts-ignore
+    const userId = req.userId
+    const {share} = req.body
 
+    if(share === false){
+        await LinkModel.deleteOne({userId})
+        return res.json({message: "Sharing disabled"});
+    }
+
+    let existingLink = await LinkModel.findOne({userId})
+    if(existingLink){
+        return res.json({
+            link: `${req.protocol}://${req.get("host")}/api/v1/brain/${existingLink.hash}`
         })
     }
+
+    const hash = crypto.randomBytes(10).toString("hex");
+    await LinkModel.create({
+        hash,
+        userId
+    })
+    res.json({
+        link: `${req.protocol}://${req.get("host")}/api/v1/brain/${hash}`,
+    })
 });
 
-app.get("/api/v1/brain/:sharedLink", (req, res) => {
+app.get("/api/v1/brain/:sharedLink", async(req, res) => {
+    const hash = req.params.sharedLink
 
+    const link = await LinkModel.findOne({hash})
+    if(!link){
+        return res.status(404).json({message: "Link not found"})
+    }
+    const content = await ContentModel.find({
+        userId: link.userId
+    }).lean()
+    res.json({content})
 });
 
 const PORT = process.env.PORT || 5761;
