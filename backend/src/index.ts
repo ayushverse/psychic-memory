@@ -7,6 +7,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import {UserModel,ContentModel} from "./db.js";
 import {userMiddleware} from "./middleware.js";
+import * as crypto from 'crypto';
+
 
 const app = express();
 app.use(express.json());
